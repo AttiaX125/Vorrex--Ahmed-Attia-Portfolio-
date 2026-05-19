@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, type MarginType } from "framer-motion";
 
 /* ─────────────────────────────────────────
    SCROLL REVEAL
@@ -65,7 +65,7 @@ type ScrollRevealProps = {
   duration?:  number;          // seconds — default 0.7
   direction?: Direction;       // default "up"
   distance?:  number;          // px offset — default 24
-  margin?:    string;          // when to trigger — default "-60px"
+  margin?:    MarginType;          // when to trigger — default "-60px"
   once?:      boolean;         // animate once only — default true
   className?: string;
   style?:     React.CSSProperties;

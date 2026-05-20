@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/Components/Navbar/Navbar";
+import Navbar         from "@/Components/Navbar/Navbar";
 import PageTransition from "@/Components/layout/PageTransition";
-import Footer from "@/Components/Footer/Footer";
+import Footer         from "@/Components/Footer/Footer";
 
 /* ─────────────────────────────────────────
    FONTS
@@ -23,6 +23,17 @@ const cormorant = Cormorant_Garamond({
   style:    ["normal", "italic"],
   display:  "swap",
 });
+
+/* ─────────────────────────────────────────
+   VIEWPORT — fixes mobile zoom issue
+   Must be a separate export in Next.js 14+
+───────────────────────────────────────── */
+export const viewport: Viewport = {
+  width:        "device-width",
+  initialScale: 1,
+  maximumScale: 1,   // prevents user zoom — remove if you want to allow it
+  themeColor:   "#09090A",
+};
 
 /* ─────────────────────────────────────────
    METADATA
@@ -74,8 +85,6 @@ export const metadata: Metadata = {
     images:      ["/og-image.png"],
   },
 
-  themeColor: "#09090A",
-
   robots: {
     index:  true,
     follow: true,
@@ -95,19 +104,21 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${cormorant.variable} scroll-smooth`}
     >
-      <body className="min-h-screen flex flex-col bg-[#09090A] text-[#F0EAE0] antialiased font-light">
-
-        {/* ── NAVBAR — always visible, never transitions ── */}
+      <body
+        suppressHydrationWarning
+        className="min-h-screen flex flex-col bg-[#09090A] text-[#F0EAE0] antialiased font-light"
+      >
+        {/* ── NAVBAR ── */}
         <Navbar />
 
-        {/* ── PAGE CONTENT — transitions on route change ── */}
+        {/* ── PAGE CONTENT ── */}
         <PageTransition>
-          <main className="flex-1">
+          <main className="flex-1 w-full overflow-x-hidden">
             {children}
           </main>
         </PageTransition>
 
-        {/* ── FOOTER — always visible, never transitions ── */}
+        {/* ── FOOTER ── */}
         <Footer />
 
       </body>

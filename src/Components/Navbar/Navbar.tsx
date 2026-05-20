@@ -1,15 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import img from "../../../public/Untitled (1).png";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import img from "../../../public/Untitled (1).png";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled,  setScrolled]  = useState(false);
+  const [menuOpen,  setMenuOpen]  = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -17,38 +17,41 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // close menu on route change
+useEffect(() => {
+  if (menuOpen) setMenuOpen(false);
+}, [pathname]);
   const links = [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
+    { label: "Home",     href: "/"         },
+    { label: "About",    href: "/about"    },
     { label: "Projects", href: "/projects" },
-    { label: "Contact", href: "/contact" },
+    { label: "Contact",  href: "/contact"  },
   ];
 
   return (
     <nav
       className={`
-        sticky top-0 z-50
-        px-12 transition-all duration-300
+        sticky top-0 z-50 w-full
+        transition-all duration-300
         border-b border-[#2A2820]
         ${scrolled ? "bg-[#09090A]/90 backdrop-blur-md" : "bg-[#09090A]"}
       `}
     >
-      <div className="flex justify-between items-center h-15.5">
-        {/* ── LOGO ── */}
-        <div className="shrink-0">
-          <Link href="/">
-            <Image
-              src={img}
-              alt="Vorrex Logo"
-              height={60}
-              width={260}
-              priority
-              style={{ width: "auto", height: "60px" }} // ← add this
-            />
-          </Link>
-        </div>
+      <div className="flex justify-between items-center h-[62px] px-5 md:px-12">
 
-        {/* ── NAV LINKS (desktop) ── */}
+        {/* ── LOGO ── */}
+        <Link href="/" className="flex-shrink-0">
+          <Image
+            src={img}
+            alt="Vorrex Logo"
+            height={60}
+            width={200}
+            priority
+            style={{ width: "auto", height: "44px" }}
+          />
+        </Link>
+
+        {/* ── NAV LINKS desktop ── */}
         <ul className="hidden md:flex items-center gap-9">
           {links.map(({ label, href }) => {
             const active = pathname === href;
@@ -58,12 +61,8 @@ export default function Navbar() {
                   href={href}
                   className={`
                     text-[10px] tracking-[2.5px] uppercase font-light
-                    transition-colors duration-250
-                    ${
-                      active
-                        ? "text-[#C8A96E]"
-                        : "text-[#5A5248] hover:text-[#E2C98A]"
-                    }
+                    transition-colors duration-200
+                    ${active ? "text-[#C8A96E]" : "text-[#5A5248] hover:text-[#E2C98A]"}
                   `}
                 >
                   {label}
@@ -76,9 +75,8 @@ export default function Navbar() {
           })}
         </ul>
 
-        {/* ── AVAILABLE BADGE ── */}
+        {/* ── AVAILABLE BADGE desktop ── */}
         <div className="hidden md:flex items-center gap-2">
-          {/* Pulsing green dot */}
           <span className="relative flex h-[7px] w-[7px]">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4A7A3A] opacity-60" />
             <span className="relative inline-flex rounded-full h-[7px] w-[7px] bg-[#4A7A3A]" />
@@ -88,27 +86,21 @@ export default function Navbar() {
           </span>
         </div>
 
-        {/* ── HAMBURGER (mobile) ── */}
+        {/* ── HAMBURGER mobile ── */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden flex flex-col gap-[5px] p-2"
           aria-label="Toggle menu"
         >
-          <span
-            className={`block w-5 h-px bg-[#C8A96E] transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-[6px]" : ""}`}
-          />
-          <span
-            className={`block w-5 h-px bg-[#C8A96E] transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}
-          />
-          <span
-            className={`block w-5 h-px bg-[#C8A96E] transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-[6px]" : ""}`}
-          />
+          <span className={`block w-5 h-px bg-[#C8A96E] transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-[6px]" : ""}`} />
+          <span className={`block w-5 h-px bg-[#C8A96E] transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
+          <span className={`block w-5 h-px bg-[#C8A96E] transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-[6px]" : ""}`} />
         </button>
       </div>
 
       {/* ── MOBILE MENU ── */}
       {menuOpen && (
-        <div className="md:hidden border-t border-[#1A1810] py-6 flex flex-col gap-5">
+        <div className="md:hidden border-t border-[#1A1810] py-6 px-5 flex flex-col gap-5 bg-[#09090A]">
           {links.map(({ label, href }) => {
             const active = pathname === href;
             return (

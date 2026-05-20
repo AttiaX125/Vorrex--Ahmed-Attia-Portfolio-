@@ -1,85 +1,113 @@
+/* ── FONTS ── */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Geist:wght@300;400;500&display=swap');
+
 @import "tailwindcss";
 
+/* ============================================
+   VORREX — Global Styles & Design Tokens
+   Ahmed Attia · Frontend Developer
+   ============================================ */
+
+
+/* ── CSS CUSTOM PROPERTIES (Design Tokens) ── */
 :root {
-  --font-display: "Cormorant Garamond Variable", "Cormorant Garamond", Georgia, serif;
-  --font-body: var(--font-geist-sans), system-ui, sans-serif;
 
-  --color-bg-primary: #09090A;
-  --color-bg-secondary: #0F0F10;
-  --color-bg-tertiary: #161614;
+  /* Colors — Background */
+  --color-bg-primary:        #09090A;
+  --color-bg-secondary:      #0F0F10;
+  --color-bg-tertiary:       #161614;
 
-  --color-gold-primary: #C8A96E;
-  --color-gold-highlight: #E2C98A;
-  --color-gold-dim: #6B5A35;
-  --color-gold-faint: rgba(200, 169, 110, 0.06);
-  --color-gold-line: rgba(200, 169, 110, 0.15);
-  --color-gold-shimmer: rgba(200, 169, 110, 0.05);
+  /* Colors — Gold */
+  --color-gold-primary:      #C8A96E;
+  --color-gold-highlight:    #E2C98A;
+  --color-gold-dim:          #6B5A35;
+  --color-gold-faint:        rgba(200, 169, 110, 0.06);
+  --color-gold-line:         rgba(200, 169, 110, 0.15);
+  --color-gold-shimmer:      rgba(200, 169, 110, 0.05);
 
-  --color-ink-primary: #F0EAE0;
-  --color-ink-muted: #5A5248;
-  --color-ink-dim: #2A2820;
-  --color-ink-ghost: #3A3630;
+  /* Colors — Ink / Text */
+  --color-ink-primary:       #F0EAE0;
+  --color-ink-muted:         #5A5248;
+  --color-ink-dim:           #2A2820;
+  --color-ink-ghost:         #3A3630;
 
-  --color-status-available: #4A7A3A;
+  /* Colors — Status */
+  --color-status-available:  #4A7A3A;
 
-  --text-hero: 80px;
-  --text-display: 68px;
-  --text-card-title: 38px;
-  --text-card-title-sm: 26px;
-  --text-quote: 26px;
-  --text-stat: 44px;
-  --text-body: 13px;
-  --text-body-sm: 12px;
-  --text-body-xs: 11px;
-  --text-label: 10px;
-  --text-tag: 9px;
+  /* Typography — Families */
+  --font-display:            'Cormorant Garamond', Georgia, serif;
+  --font-body:               'Geist', system-ui, sans-serif;
 
-  --leading-hero: 0.88;
-  --leading-display: 0.90;
-  --leading-tight: 1.00;
-  --leading-snug: 1.35;
-  --leading-body: 1.90;
-  --leading-body-sm: 1.80;
-  --leading-body-xs: 1.75;
+  /* Typography — Sizes */
+  --text-hero:               80px;
+  --text-display:            68px;
+  --text-card-title:         38px;
+  --text-card-title-sm:      26px;
+  --text-quote:              26px;
+  --text-stat:               44px;
+  --text-body:               13px;
+  --text-body-sm:            12px;
+  --text-body-xs:            11px;
+  --text-label:              10px;
+  --text-tag:                9px;
+  --text-micro:              9px;
 
-  --tracking-wide: 2px;
-  --tracking-wider: 3px;
-  --tracking-widest: 4px;
+  /* Typography — Line Heights */
+  --leading-hero:            0.88;
+  --leading-display:         0.90;
+  --leading-tight:           1.00;
+  --leading-snug:            1.35;
+  --leading-body:            1.90;
+  --leading-body-sm:         1.80;
+  --leading-body-xs:         1.75;
 
-  --space-page-x: 48px;
-  --space-section-y: 56px;
-  --space-card-x: 36px;
-  --space-card-y: 28px;
-  --space-nav-height: 62px;
-  --space-ticker-height: 38px;
-  --space-section-head-y: 20px;
-  --space-card-gap: 20px;
-  --space-stack-gap: 32px;
-  --space-element-gap: 16px;
-  --space-tag-gap: 7px;
-  --space-tag-x: 11px;
-  --space-tag-y: 4px;
-  --space-btn-x: 28px;
-  --space-btn-y: 13px;
+  /* Typography — Letter Spacing */
+  --tracking-wide:           2px;
+  --tracking-wider:          3px;
+  --tracking-widest:         4px;
 
-  --border-default: 1px solid #2A2820;
-  --border-gold: 1px solid #6B5A35;
+  /* Spacing */
+  --space-page-x:            48px;
+  --space-section-y:         56px;
+  --space-card-x:            36px;
+  --space-card-y:            28px;
+  --space-nav-height:        62px;
+  --space-ticker-height:     38px;
+  --space-section-head-y:    20px;
+  --space-card-gap:          20px;
+  --space-stack-gap:         32px;
+  --space-element-gap:       16px;
+  --space-tag-gap:           7px;
+  --space-tag-x:             11px;
+  --space-tag-y:             4px;
+  --space-btn-x:             28px;
+  --space-btn-y:             13px;
 
-  --anim-fast: 0.25s;
-  --anim-base: 0.35s;
-  --anim-slide: 0.60s;
-  --anim-shimmer: 0.70s;
-  --anim-snap: 0.50s;
-  --ease-slide: cubic-bezier(0.77, 0, 0.18, 1);
-  --ease-snap: cubic-bezier(0.23, 1, 0.32, 1);
+  /* Borders */
+  --border-default:          1px solid #2A2820;
+  --border-gold:             1px solid #6B5A35;
+  --border-radius:           0px;
 
-  --card-width: 300px;
-  --card-width-featured: 340px;
-  --card-visual-height: 180px;
-  --card-perspective: 900px;
+  /* Animations */
+  --anim-fast:               0.25s;
+  --anim-base:               0.35s;
+  --anim-slide:              0.60s;
+  --anim-shimmer:            0.70s;
+  --anim-snap:               0.50s;
+  --ease-slide:              cubic-bezier(0.77, 0, 0.18, 1);
+  --ease-snap:               cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* Cards */
+  --card-width:              300px;
+  --card-width-featured:     340px;
+  --card-visual-height:      180px;
+  --card-perspective:        900px;
 }
 
-*, *::before, *::after {
+/* ── BASE RESET & DEFAULTS ── */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -104,6 +132,7 @@ body {
   flex-direction: column;
 }
 
+/* ── TYPOGRAPHY DEFAULTS ── */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 300;
@@ -118,20 +147,41 @@ p {
   line-height: var(--leading-body);
 }
 
-a { color: inherit; text-decoration: none; }
-ul, ol { list-style: none; }
-img, video { max-width: 100%; display: block; }
-button { cursor: pointer; border: none; background: none; font-family: var(--font-body); }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
+ul, ol {
+  list-style: none;
+}
+
+img, video {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+}
+
+/* ── UTILITY CLASSES ── */
+
+/* Font families */
 .font-display { font-family: var(--font-display); }
 .font-body    { font-family: var(--font-body); }
 
-.text-gold          { color: var(--color-gold-primary); }
+/* Gold text */
+.text-gold         { color: var(--color-gold-primary); }
 .text-gold-highlight { color: var(--color-gold-highlight); }
-.text-gold-dim      { color: var(--color-gold-dim); }
-.text-muted         { color: var(--color-ink-muted); }
-.text-ghost         { color: var(--color-ink-ghost); }
+.text-gold-dim     { color: var(--color-gold-dim); }
+.text-muted        { color: var(--color-ink-muted); }
+.text-ghost        { color: var(--color-ink-ghost); }
 
+/* Section label style */
 .label {
   font-family: var(--font-body);
   font-size: var(--text-tag);
@@ -141,22 +191,38 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   font-weight: 400;
 }
 
+/* Gold gradient rule */
 .rule-gold {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-gold-dim) 30%, var(--color-gold-dim) 70%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-gold-dim) 30%,
+    var(--color-gold-dim) 70%,
+    transparent
+  );
 }
 
+/* Vertical gold rule */
 .rule-gold-v {
   width: 1px;
-  background: linear-gradient(180deg, transparent, var(--color-gold-line) 20%, var(--color-gold-line) 80%, transparent);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--color-gold-line) 20%,
+    var(--color-gold-line) 80%,
+    transparent
+  );
 }
 
+/* Page padding */
 .page-x {
   padding-left: var(--space-page-x);
   padding-right: var(--space-page-x);
 }
 
+/* Gold button */
 .btn-gold {
   display: inline-flex;
   align-items: center;
@@ -178,27 +244,62 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   color: var(--color-bg-primary);
 }
 
-.shimmer { position: relative; overflow: hidden; }
+/* Gold shimmer card effect */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
 .shimmer::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, transparent 35%, var(--color-gold-shimmer) 50%, transparent 65%);
+  background: linear-gradient(
+    110deg,
+    transparent 35%,
+    var(--color-gold-shimmer) 50%,
+    transparent 65%
+  );
   transform: translateX(-100%);
   transition: transform var(--anim-shimmer);
   pointer-events: none;
   z-index: 1;
 }
-.shimmer:hover::before { transform: translateX(100%); }
+.shimmer:hover::before {
+  transform: translateX(100%);
+}
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--color-bg-primary); }
-::-webkit-scrollbar-thumb { background: var(--color-gold-dim); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-gold-primary); }
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold-dim);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-primary);
+}
 
-::selection { background: var(--color-gold-dim); color: var(--color-bg-primary); }
+/* ── SELECTION ── */
+::selection {
+  background: var(--color-gold-dim);
+  color: var(--color-bg-primary);
+}
 
-:focus-visible { outline: 1px solid var(--color-gold-dim); outline-offset: 3px; }
+/* ── FOCUS ── */
+:focus-visible {
+  outline: 1px solid var(--color-gold-dim);
+  outline-offset: 3px;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes ping-slow {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%       { transform: scale(2); opacity: 0; }
+}
 
 @keyframes ticker {
   0%   { transform: translateX(0); }
@@ -215,6 +316,102 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   to   { opacity: 1; }
 }
 
-.animate-ticker  { animation: ticker 28s linear infinite; }
-.animate-fade-up { animation: fadeUp 0.7s var(--ease-snap) forwards; }
-.animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+.animate-ticker {
+  animation: ticker 28s linear infinite;
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.7s var(--ease-snap) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* ── PREVENT HORIZONTAL SCROLL GLOBALLY ── */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+
+  /* Reduce page padding */
+  :root {
+    --space-page-x:      20px;
+    --space-section-y:   32px;
+    --space-card-x:      20px;
+    --space-card-y:      20px;
+    --space-nav-height:  56px;
+    --text-stat:         36px;
+  }
+
+  /* Hide vertical rules — they break on mobile */
+  .rule-gold-v {
+    display: none !important;
+  }
+
+  /* Hero headline */
+  h1 {
+    font-size: clamp(36px, 10vw, 52px) !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.5px !important;
+  }
+
+  /* Section headings */
+  h2 {
+    font-size: clamp(22px, 7vw, 34px) !important;
+  }
+
+  /* Prevent any single element from overflowing its parent */
+  * {
+    max-width: 100%;
+  }
+
+  /* Fix nav links spacing */
+  nav {
+    padding-left:  16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Ticker — keep working on mobile */
+  .animate-ticker {
+    animation: ticker 18s linear infinite;
+  }
+
+  /* Buttons — reasonable size on mobile, not always 100% */
+  .btn-gold {
+    min-width: 140px;
+  }
+
+  /* Certifications — single column on mobile */
+  .certs-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stat grid — keep 2 columns on mobile */
+  .stat-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Footer — stack columns */
+  footer .grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px;
+  }
+}
+
+/* Touch devices — disable 3D tilt transforms */
+@media (hover: none) {
+  * {
+    transform: none !important;
+    transition: opacity 0.3s, border-color 0.3s !important;
+  }
+  /* Re-enable legitimate transforms */
+  .animate-ticker {
+    transform: none !important;
+    animation: ticker 18s linear infinite !important;
+    transition: none !important;
+  }
+}

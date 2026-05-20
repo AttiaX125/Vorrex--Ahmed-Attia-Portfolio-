@@ -5,56 +5,56 @@ import { homeProjects as projects } from "@/data/projects";
 import Link from "next/link";
 import MockUI from "./ShopMock";
 
-
 /* ─────────────────────────────────────────
    INFINITE PROJECT SLIDER
-   - Fixed visible width so cards don't all
-     show at once on desktop
-   - Infinite loop: after last card wraps
-     back to first seamlessly
-   - 3D tilt on hover
-   - Auto-plays every 4 seconds
-   - Pauses on hover
+   - Mobile: full-width single card stack
+   - Desktop: fixed visible width slider
+   - Infinite loop with seamless wrap
+   - 3D tilt on desktop hover only
+   - Auto-plays every 4 seconds, pauses on hover
 ───────────────────────────────────────── */
 
-const CARD_WIDTH_FEATURED = 340;
-const CARD_WIDTH_DEFAULT  = 300;
-const CARD_GAP            = 20;
+const CARD_GAP = 20;
 
-/* Clone list for infinite loop — original + clone at end + clone at start */
+/* Clone list for infinite loop */
 const cloned = [
   { ...projects[projects.length - 1], id: -1,   _key: "clone-start" },
   ...projects.map((p) => ({ ...p, _key: `real-${p.id}` })),
   { ...projects[0],                   id: 9999, _key: "clone-end"   },
 ];
 
-function getCardWidth(featured: boolean) {
-  return featured ? CARD_WIDTH_FEATURED : CARD_WIDTH_DEFAULT;
+/* Card widths — responsive */
+function getCardWidth(featured: boolean, isMobile: boolean): number {
+  if (isMobile) return typeof window !== "undefined" ? Math.min(window.innerWidth - 48, 320) : 300;
+  return featured ? 340 : 300;
 }
 
-/* Total offset to reach card at index i in cloned array */
-function getOffset(index: number): number {
+function getOffset(index: number, isMobile: boolean): number {
   let offset = 0;
   for (let i = 0; i < index; i++) {
-    offset += getCardWidth(cloned[i].featured) + CARD_GAP;
+    const w = getCardWidth(cloned[i].featured, isMobile);
+    offset += w + CARD_GAP;
   }
   return offset;
 }
 
 export default function ProjectSlider() {
   const total = projects.length;
+  const [clonedIndex, setClonedIndex] = useState(1);
+  const [realIndex,   setRealIndex]   = useState(0);
+  const [animating,   setAnimating]   = useState(false);
+  const [paused,      setPaused]      = useState(false);
+  const [isMobile,    setIsMobile]    = useState(false);
+  const trackRef = useRef<HTMLDivElement>(null);
 
-  /*
-    clonedIndex: position in cloned array
-    starts at 1 — skips the clone-start, lands on real first card
-  */
-  const [clonedIndex, setClonedIndex]     = useState(1);
-  const [realIndex,   setRealIndex]       = useState(0);
-  const [animating,   setAnimating]       = useState(false);
-  const [paused,      setPaused]          = useState(false);
-  const trackRef                          = useRef<HTMLDivElement>(null);
+  /* Detect mobile */
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
-  /* ── apply transform ── */
   const applyTransform = useCallback(
     (index: number, animated: boolean) => {
       const track = trackRef.current;
@@ -62,26 +62,29 @@ export default function ProjectSlider() {
       track.style.transition = animated
         ? "transform 0.6s cubic-bezier(0.77, 0, 0.18, 1)"
         : "none";
-      track.style.transform = `translateX(-${getOffset(index)}px)`;
+      track.style.transform = `translateX(-${getOffset(index, isMobile)}px)`;
     },
-    []
+    [isMobile]
   );
 
-  /* ── initialize position ── */
+  /* Initialize + re-init on mobile change */
+  useEffect(() => {
+    applyTransform(clonedIndex, false);
+  }, [isMobile]); // eslint-disable-line
+
   useEffect(() => {
     applyTransform(1, false);
   }, [applyTransform]);
 
-  /* ── go to a real index (0-based) ── */
   const goTo = useCallback(
     (nextReal: number) => {
       if (animating) return;
       setAnimating(true);
-
-      const nextCloned = nextReal + 1; // offset by 1 because of clone-start
+      const nextCloned = nextReal + 1;
       setClonedIndex(nextCloned);
       setRealIndex(nextReal);
       applyTransform(nextCloned, true);
+      setTimeout(() => setAnimating(false), 640);
     },
     [animating, applyTransform]
   );
@@ -89,12 +92,10 @@ export default function ProjectSlider() {
   const goNext = useCallback(() => {
     if (animating) return;
     const nextCloned = clonedIndex + 1;
-
     setAnimating(true);
     setClonedIndex(nextCloned);
     applyTransform(nextCloned, true);
 
-    /* If we hit the clone-end, jump back to real first */
     if (nextCloned === cloned.length - 1) {
       setTimeout(() => {
         applyTransform(1, false);
@@ -111,15 +112,13 @@ export default function ProjectSlider() {
   const goPrev = useCallback(() => {
     if (animating) return;
     const nextCloned = clonedIndex - 1;
-
     setAnimating(true);
     setClonedIndex(nextCloned);
     applyTransform(nextCloned, true);
 
-    /* If we hit the clone-start, jump back to real last */
     if (nextCloned === 0) {
       setTimeout(() => {
-        const lastReal = total; // cloned index of last real card
+        const lastReal = total;
         applyTransform(lastReal, false);
         setClonedIndex(lastReal);
         setRealIndex(total - 1);
@@ -131,7 +130,21 @@ export default function ProjectSlider() {
     }
   }, [animating, clonedIndex, applyTransform, total]);
 
-  /* ── auto-play ── */
+  /* Touch swipe support */
+  const touchStartX = useRef<number | null>(null);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? goNext() : goPrev();
+    }
+    touchStartX.current = null;
+  };
+
+  /* Auto-play */
   useEffect(() => {
     if (paused) return;
     const timer = setInterval(() => goNext(), 4000);
@@ -151,30 +164,31 @@ export default function ProjectSlider() {
           display:        "flex",
           justifyContent: "space-between",
           alignItems:     "center",
-          padding:        "var(--space-section-head-y) var(--space-page-x)",
+          padding:        "36px var(--space-page-x)",
           borderBottom:   "var(--border-default)",
+          gap:            12,
         }}
       >
         {/* Left label */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <span style={{ fontSize:"var(--text-tag)", letterSpacing:"var(--tracking-widest)", textTransform:"uppercase", color:"var(--color-gold-dim)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, overflow: "hidden" }}>
+          <span style={{ fontSize:"var(--text-tag)", letterSpacing:"var(--tracking-widest)", textTransform:"uppercase", color:"var(--color-gold-dim)", whiteSpace:"nowrap" }}>
             Selected Work
           </span>
-          <span style={{ display:"block", width:40, height:1, background:"linear-gradient(90deg, var(--color-gold-dim), transparent)" }} />
-          <span style={{ fontFamily:"var(--font-display)", fontStyle:"italic", fontSize:13, color:"var(--color-ink-muted)" }}>
+          <span className="hidden md:block" style={{ display:"block", width:40, height:1, background:"linear-gradient(90deg, var(--color-gold-dim), transparent)", flexShrink:0 }} />
+          <span className="hidden md:block" style={{ fontFamily:"var(--font-display)", fontStyle:"italic", fontSize:13, color:"var(--color-ink-muted)", whiteSpace:"nowrap" }}>
             {total} projects
           </span>
         </div>
 
         {/* Right: counter + arrows */}
-        <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-          <span style={{ fontSize:"var(--text-micro)", letterSpacing:"var(--tracking-wide)", color:"var(--color-ink-muted)", minWidth:48, textAlign:"center" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12, flexShrink:0 }}>
+          <span style={{ fontSize:"var(--text-micro)", letterSpacing:"var(--tracking-wide)", color:"var(--color-ink-muted)", minWidth:40, textAlign:"center" }}>
             {String(realIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
           </span>
 
-          {/* Prev */}
           <button
             onClick={goPrev}
+            aria-label="Previous project"
             style={{
               width:36, height:36,
               border:"var(--border-default)",
@@ -183,8 +197,9 @@ export default function ProjectSlider() {
               cursor:"pointer",
               display:"flex", alignItems:"center", justifyContent:"center",
               fontSize:14,
-              transition:"border-color var(--anim-fast), color var(--anim-fast), background var(--anim-fast)",
+              transition:"border-color var(--anim-fast), color var(--anim-fast)",
               fontFamily:"var(--font-body)",
+              flexShrink:0,
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = "var(--color-gold-dim)";
@@ -198,9 +213,9 @@ export default function ProjectSlider() {
             ←
           </button>
 
-          {/* Next */}
           <button
             onClick={goNext}
+            aria-label="Next project"
             style={{
               width:36, height:36,
               border:"1px solid var(--color-gold-dim)",
@@ -211,6 +226,7 @@ export default function ProjectSlider() {
               fontSize:14,
               transition:"border-color var(--anim-fast), color var(--anim-fast), background var(--anim-fast)",
               fontFamily:"var(--font-body)",
+              flexShrink:0,
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "var(--color-gold-primary)";
@@ -227,38 +243,34 @@ export default function ProjectSlider() {
       </div>
 
       {/* ── SLIDER STAGE ── */}
-      {/*
-        max-width + overflow:hidden is what fixes the desktop issue.
-        The stage clips everything outside its bounds.
-      */}
       <div
         style={{
-          padding:   "48px 0 48px var(--space-page-x)",
-          overflow:  "hidden",           /* ← clips cards outside view */
+          padding:   "36px 0 36px var(--space-page-x)",
+          overflow:  "hidden",
           position:  "relative",
           width:     "100%",
           maxWidth:  "100vw",
         }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         {/* Right peek fade mask */}
         <div
           style={{
             position:"absolute", top:0, right:0, bottom:0,
-            width:140,
+            width: isMobile ? 40 : 120,
             background:"linear-gradient(270deg, var(--color-bg-primary) 20%, transparent)",
             zIndex:10,
             pointerEvents:"none",
           }}
         />
 
-        {/* Track — contains all cloned cards in a row */}
         <div
           ref={trackRef}
           style={{
             display:   "flex",
             gap:       CARD_GAP,
             willChange:"transform",
-            /* transition is set imperatively via JS */
           }}
         >
           {cloned.map((project, i) => (
@@ -266,19 +278,21 @@ export default function ProjectSlider() {
               key={project._key}
               project={project}
               isActive={i - 1 === realIndex}
+              isMobile={isMobile}
             />
           ))}
         </div>
       </div>
 
       {/* ── DOTS ── */}
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8, paddingBottom:40 }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8, paddingBottom:32 }}>
         {projects.map((_, i) => (
           <button
             key={i}
             onClick={() => goTo(i)}
+            aria-label={`Go to project ${i + 1}`}
             style={{
-              width:      i === realIndex ? 40 : 20,
+              width:      i === realIndex ? 32 : 16,
               height:     2,
               background: i === realIndex ? "var(--color-gold-primary)" : "var(--color-ink-dim)",
               border:     "none",
@@ -291,7 +305,7 @@ export default function ProjectSlider() {
       </div>
 
       {/* ── VIEW ALL ── */}
-      <div style={{ display:"flex", justifyContent:"center", paddingBottom:48 }}>
+      <div style={{ display:"flex", justifyContent:"center", paddingBottom:40 }}>
         <Link href="/projects" className="btn-gold">
           View All Projects →
         </Link>
@@ -307,14 +321,17 @@ export default function ProjectSlider() {
 function SliderCard({
   project,
   isActive,
+  isMobile,
 }: {
   project: (typeof cloned)[0];
   isActive: boolean;
+  isMobile: boolean;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const width   = getCardWidth(project.featured);
+  const width   = getCardWidth(project.featured, isMobile);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile) return;
     const card = cardRef.current;
     if (!card) return;
     const r = card.getBoundingClientRect();
@@ -325,6 +342,7 @@ function SliderCard({
   };
 
   const handleMouseLeave = () => {
+    if (isMobile) return;
     const card = cardRef.current;
     if (!card) return;
     card.style.transform  = "perspective(900px) rotateY(0deg) rotateX(0deg) translateY(0px)";
@@ -362,24 +380,12 @@ function SliderCard({
 
       {/* Visual area */}
       <div style={{ height: project.featured ? 200 : 180, background:"var(--color-bg-tertiary)", borderBottom:"var(--border-default)", overflow:"hidden", flexShrink:0 }}>
-        {/*
-          ── SWAP SCREENSHOT HERE ──
-          <Image
-            src={`/projects/project-${project.id}.jpg`}
-            alt={project.name}
-            width={width}
-            height={project.featured ? 200 : 180}
-            className="w-full h-full object-cover"
-            style={{ opacity: 0.8 }}
-          />
-        */}
         <MockUI type={project.mockType} />
       </div>
 
       {/* Card body */}
-      <div style={{ padding:"22px 22px 20px", display:"flex", flexDirection:"column", flex:1, position:"relative", zIndex:2 }}>
+      <div style={{ padding:"20px 20px 18px", display:"flex", flexDirection:"column", flex:1, position:"relative", zIndex:2 }}>
 
-        {/* Num + year */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
           <span style={{ fontSize:"var(--text-tag)", letterSpacing:"2.5px", textTransform:"uppercase", color:"var(--color-gold-dim)" }}>
             Project {project.num}
@@ -389,7 +395,6 @@ function SliderCard({
           </span>
         </div>
 
-        {/* Title */}
         <div style={{ fontFamily:"var(--font-display)", fontSize:"var(--text-card-title-sm)", fontWeight:300, lineHeight:1, letterSpacing:"-0.3px", color:"var(--color-ink-primary)", marginBottom:8 }}>
           {project.name}
           <em style={{ fontStyle:"italic", color:"var(--color-gold-primary)", display:"block", fontSize:22 }}>
@@ -397,28 +402,25 @@ function SliderCard({
           </em>
         </div>
 
-        {/* Description */}
-        <p style={{ fontSize:"var(--text-body-xs)", lineHeight:"var(--leading-body-xs)", color:"var(--color-ink-muted)", fontWeight:300, marginBottom:16, flex:1 }}>
+        <p style={{ fontSize:"var(--text-body-xs)", lineHeight:"var(--leading-body-xs)", color:"var(--color-ink-muted)", fontWeight:300, marginBottom:14, flex:1 }}>
           {project.desc}
         </p>
 
-        {/* Tags */}
-        <div style={{ display:"flex", gap:"var(--space-tag-gap)", flexWrap:"wrap", marginBottom:16 }}>
-          {project.tags.map((tag) => (
+        <div style={{ display:"flex", gap:"var(--space-tag-gap)", flexWrap:"wrap", marginBottom:14 }}>
+          {project.tags.slice(0, 3).map((tag) => (
             <span key={tag} style={{ fontSize:"var(--text-tag)", letterSpacing:"1.5px", textTransform:"uppercase", color:"var(--color-gold-dim)", border:"var(--border-default)", padding:"var(--space-tag-y) var(--space-tag-x)" }}>
               {tag}
             </span>
           ))}
         </div>
 
-        {/* Link */}
         <Link
           href={project.link}
           style={{ display:"flex", alignItems:"center", gap:8, fontSize:"var(--text-tag)", letterSpacing:"2.5px", textTransform:"uppercase", color:"var(--color-ink-muted)", transition:"color var(--anim-fast)", width:"fit-content" }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-gold-primary)")}
           onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-ink-muted)")}
         >
-          <span style={{ display:"inline-block", width:18, height:1, background:"currentColor", transition:"width var(--anim-base)" }} />
+          <span style={{ display:"inline-block", width:18, height:1, background:"currentColor", flexShrink:0 }} />
           Case Study
         </Link>
       </div>
